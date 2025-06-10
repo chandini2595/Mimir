@@ -5,7 +5,9 @@ import Sidebar from '@/components/Sidebar'
 import ChatWindow from '@/components/ChatWindow'
 import ChatInput from '@/components/ChatInput'
 import FileUploader from '@/components/FileUploader'
-import PDFViewer from '@/components/PDFViewer'
+import dynamic from 'next/dynamic'
+
+const PDFViewer = dynamic(() => import('@/components/PDFViewer'), { ssr: false })
 
 export default function ChatPage() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null)
