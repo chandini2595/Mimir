@@ -85,8 +85,49 @@ export default function ChatPage() {
 
   // Open all in new tab (side by side)
   const handleOpenAll = () => {
-    const urls = pdfFiles.slice(0, 3).map(f => f.url)
-    const html = `<html><body style='display:flex;gap:8px;background:#f8fafc;padding:16px;'>${urls.map(u => `<iframe src='${u}' style='width:33vw;height:95vh;border:1px solid #ccc;background:#fff;'></iframe>`).join('')}</body></html>`
+    const html = `<!DOCTYPE html><html><head><title>Document Preview</title>
+      <style>
+        body { margin: 0; padding: 0; background: linear-gradient(120deg, #0f172a 0%, #1e293b 100%); min-height: 100vh; display: flex; align-items: stretch; gap: 24px; justify-content: center; }
+        .doc-preview {
+          flex: 1 1 0;
+          min-width: 0;
+          max-width: 33vw;
+          height: 96vh;
+          margin: 2vh 0;
+          border-radius: 1.5rem;
+          background: rgba(255,255,255,0.10);
+          box-shadow: 0 8px 40px 0 rgba(80,120,255,0.13), 0 2px 12px 0 rgba(0,0,0,0.10);
+          border: 2.5px solid rgba(120,180,255,0.18);
+          backdrop-filter: blur(18px) saturate(1.5);
+          -webkit-backdrop-filter: blur(18px) saturate(1.5);
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        }
+        .doc-title {
+          font-family: 'Fira Mono', 'JetBrains Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+          color: #60a5fa;
+          font-size: 1rem;
+          font-weight: 700;
+          letter-spacing: 0.01em;
+          background: rgba(30,41,59,0.85);
+          padding: 0.5rem 1rem;
+          border-bottom: 1.5px solid #a5b4fc33;
+          text-align: center;
+        }
+        iframe {
+          flex: 1 1 0;
+          width: 100%;
+          height: 100%;
+          border: none;
+          background: #fff;
+        }
+      </style>
+    </head><body>` +
+      pdfFiles.slice(0, 3).map(function(f) {
+        return '<div class="doc-preview"><div class="doc-title">' + f.name + '</div><iframe src="' + f.url + '"></iframe></div>';
+      }).join('') +
+    `</body></html>`;
     const win = window.open()
     if (win) win.document.write(html)
   }
@@ -136,7 +177,7 @@ export default function ChatPage() {
   }, [showPreview])
 
   return (
-    <main className="flex h-screen overflow-hidden">
+    <main className="flex h-screen overflow-hidden" style={{ fontFamily: 'Fira Mono, JetBrains Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', fontSize: '14px' }}>
       {/* Sidebar with collapsible button */}
       <div className="relative h-full" style={{ width: sidebarOpen ? 256 : 0, minWidth: 0, transition: 'width 0.5s cubic-bezier(.4,2,.6,1)' }}>
         {/* Sidebar itself with slide-in/out animation */}
@@ -318,13 +359,6 @@ export default function ChatPage() {
         )}
         <ChatWindow messages={messages} />
         <ChatInput onResponse={handleResponse} />
-        {/* Welcome message if no files uploaded yet */}
-        <div className={`pointer-events-none fixed left-0 right-0 flex flex-col items-center justify-center z-40 transition-all duration-1000 ${pdfFiles.length === 0 ? 'opacity-100 scale-100 visible flare-in' : 'opacity-0 scale-95 invisible flare-out'}`} style={{ top: '50%', transform: 'translateY(-50%)' }}>
-          <div className="bg-transparent px-0 py-0 select-none flex flex-col items-center gap-2">
-            <h1 className="text-4xl font-extrabold mb-1 text-blue-700 drop-shadow-none tracking-tight welcome-flare-piece" style={{animationDelay: '0ms'}}>Hello {typeof window !== 'undefined' && localStorage.getItem('username') ? localStorage.getItem('username') : 'User'}</h1>
-            <h2 className="text-2xl font-semibold text-gray-700 welcome-flare-piece" style={{animationDelay: '200ms'}}>Welcome to Mimir!</h2>
-          </div>
-        </div>
       </div>
       {/* Collapsible Preview Window with glassy animation */}
       <div
@@ -339,13 +373,13 @@ export default function ChatPage() {
             style={{ userSelect: 'none' }}
           />
         )}
-        <div className="p-2 font-semibold border-b flex items-center justify-between relative">
+        <div className="p-2 font-semibold border-b flex items-center justify-between relative" style={{ fontFamily: 'Fira Mono, JetBrains Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', letterSpacing: '0.01em', fontSize: '1.1rem', color: '#1e293b' }}>
           <span>
-            Previewing <strong>{pdfFiles[selectedIndex]?.name || '...'}</strong>
+            Previewing <strong style={{ fontFamily: 'Fira Mono, JetBrains Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', color: '#2563eb', fontWeight: 700 }}>{pdfFiles[selectedIndex]?.name || '...'}</strong>
           </span>
         </div>
-        <div className="flex items-center gap-2 px-2 py-2 border-b bg-gray-50/80">
-          <label className="text-xs text-gray-600">Zoom:</label>
+        <div className="flex items-center gap-2 px-2 py-2 border-b bg-gray-50/80" style={{ fontFamily: 'Fira Mono, JetBrains Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', fontSize: '0.95rem', color: '#334155' }}>
+          <label className="text-xs" style={{ color: '#64748b' }}>Zoom:</label>
           <input
             type="number"
             className="w-[60px] px-2 py-1 text-sm border rounded"
@@ -353,14 +387,15 @@ export default function ChatPage() {
             min={25}
             max={300}
             onChange={(e) => setZoom(Number(e.target.value))}
+            style={{ fontFamily: 'inherit', fontSize: '1rem', color: '#2563eb', fontWeight: 600 }}
           />
-          <span className="text-xs text-gray-600">%</span>
+          <span className="text-xs" style={{ color: '#64748b' }}>%</span>
         </div>
         <div className="flex-1 overflow-y-auto">
           {pdfFiles[selectedIndex]?.url ? (
             <PDFViewer url={pdfFiles[selectedIndex].url} fileName={pdfFiles[selectedIndex].name} zoom={zoom} />
           ) : (
-            <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+            <div className="flex-1 flex items-center justify-center text-sm" style={{ fontFamily: 'Fira Mono, JetBrains Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', color: '#64748b', opacity: 0.8 }}>
               (No document loaded)
             </div>
           )}

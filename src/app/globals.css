@@ -123,6 +123,21 @@
   }
 }
 
+.button-glass, .glass-btn, button, .btn {
+  border-radius: 1.25rem !important;
+  background: linear-gradient(135deg, rgba(173,216,230,0.55) 0%, rgba(255,255,255,0.35) 100%) !important;
+  box-shadow: 0 8px 40px 0 rgba(80,120,255,0.13), 0 2px 12px 0 rgba(0,0,0,0.10) !important;
+  border: 2px solid rgba(120,180,255,0.18) !important;
+  backdrop-filter: blur(18px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(1.5) !important;
+  color: #2563eb !important;
+  transition: box-shadow 0.2s, background 0.2s, border 0.2s;
+}
+.button-glass:hover, .glass-btn:hover, button:hover, .btn:hover {
+  background: linear-gradient(135deg, rgba(173,216,230,0.75) 0%, rgba(255,255,255,0.55) 100%) !important;
+  box-shadow: 0 12px 48px 0 rgba(80,120,255,0.18), 0 2px 12px 0 rgba(0,0,0,0.13) !important;
+  border: 2.5px solid #a5b4fc !important;
+}
 @keyframes magic-flare-in {
   0% { opacity: 0; transform: scale(0.9) rotate(-6deg); filter: blur(8px) brightness(1.2); }
   60% { opacity: 1; transform: scale(1.05) rotate(2deg); filter: blur(2px) brightness(1.1); }
