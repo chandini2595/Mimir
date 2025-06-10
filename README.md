@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mimir Chat UI (Frontend)
+
+A modern web interface for Retrieval-Augmented Generation (RAG) document chat. Upload documents, preview pages, and chat with your files using a powerful, responsive Next.js 14 + Tailwind CSS frontend.
+
+---
+
+## Features
+
+- **Multi-file Upload & Preview**: Drag-and-drop or pick images, Word, or PDF files. Preview and zoom in on any page.
+- **Collapsible Preview Window**: View the page/image referenced by the AI, with zoom and navigation controls.
+- **Dedicated Chat Window**: Real-time conversation with markdown rendering, follow-up, and copy answer.
+- **Collapsible Sidebar**: Chat history, file tree, and quick actions.
+- **Stacked Deck UI**: Switch between multiple files with a beautiful card deck and list view.
+- **Responsive Layout**: Works on desktop and mobile, with keyboard shortcuts.
+- **Role-based UI**: (Planned) User/Admin features.
+
+---
+
+## Requirements
+
+This frontend requires a compatible backend and AWS services:
+
+- **Backend API**: Node.js/Express server with endpoints for file upload, chat, authentication, and admin (see PRD).
+- **AWS S3**: For file storage. [AWS S3 Console](https://s3.console.aws.amazon.com/s3/)
+- **AWS Textract**: For server-side text extraction. [AWS Textract Console](https://console.aws.amazon.com/textract/)
+- **AWS Bedrock**: For LLM-powered Q&A. [AWS Bedrock Console](https://console.aws.amazon.com/bedrock/)
+- **AWS CloudWatch**: For monitoring and metrics. [AWS CloudWatch Console](https://console.aws.amazon.com/cloudwatch/)
+- **Authentication**: JWT-based, with user and admin roles.
+
+You must configure the frontend to point to your backend API (see `.env` or `NEXT_PUBLIC_BACKEND_URL`).
+
+---
 
 ## Getting Started
 
-First, run the development server:
+1. **Install dependencies:**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+2. **Set backend API URL:**
+   - Create a `.env.local` file:
+     ```env
+     NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
+     ```
+3. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+4. **Open** [http://localhost:3000](http://localhost:3000) in your browser.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Project Structure
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `src/app/` — Main Next.js app, routes, and API handlers
+- `src/components/` — UI components (Chat, Sidebar, FileUploader, PDFViewer, etc.)
+- `public/` — Static assets and PDF worker
+- `types/` — TypeScript type definitions
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
+
+## Cloud Integration Checklist
+
+- [ ] AWS S3 bucket created and accessible
+- [ ] AWS Textract enabled
+- [ ] AWS Bedrock access (for LLM)
+- [ ] Backend API deployed and reachable
+- [ ] Environment variables set for API URL
+
+---
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [AWS S3](https://s3.console.aws.amazon.com/s3/)
+- [AWS Textract](https://console.aws.amazon.com/textract/)
+- [AWS Bedrock](https://console.aws.amazon.com/bedrock/)
+- [AWS CloudWatch](https://console.aws.amazon.com/cloudwatch/)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
