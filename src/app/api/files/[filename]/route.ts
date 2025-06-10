@@ -1,4 +1,6 @@
 import { NextRequest } from 'next/server'
+import fs from 'fs'
+import path from 'path'
 
 export async function GET(req: NextRequest, { params }: { params: { filename: string } }) {
   const filename = decodeURIComponent(params.filename)
@@ -6,8 +8,6 @@ export async function GET(req: NextRequest, { params }: { params: { filename: st
   // Serve from local if in dev mode
   if (process.env.NEXT_PUBLIC_LOCAL_DEV === 'true') {
     // Support subfolders (e.g., folder/page-1.pdf)
-    const fs = require('fs')
-    const path = require('path')
     const localPath = path.join(process.cwd(), '../../backend/local_uploads', filename)
     if (!fs.existsSync(localPath)) {
       return new Response('File not found', { status: 404 })
