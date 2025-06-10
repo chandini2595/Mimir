@@ -5,11 +5,12 @@ import Sidebar from '@/components/Sidebar'
 import ChatWindow from '@/components/ChatWindow'
 import ChatInput from '@/components/ChatInput'
 import FileUploader from '@/components/FileUploader'
-import dynamic from 'next/dynamic'
-
-const PDFViewer = dynamic(() => import('@/components/PDFViewer'), { ssr: false })
+import PDFViewer from '@/components/PDFViewer'
 
 export default function ChatPage() {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [fileName, setFileName] = useState<string | null>(null)
+  const [filePath, setFilePath] = useState<string | null>(null)
   const [messages, setMessages] = useState<{ user: string; ai: string }[]>([])
   const [showPreview, setShowPreview] = useState(true)
   const [previewWidth, setPreviewWidth] = useState(400)
@@ -18,6 +19,7 @@ export default function ChatPage() {
   const [pdfFiles, setPdfFiles] = useState<Array<{ url: string, name: string, fullPath: string }>>([])
   const [selectedIndex, setSelectedIndex] = useState<number>(0)
   const [deckOpen, setDeckOpen] = useState(false)
+  const [hoveredIndex, setHoveredIndex] = useState<number | undefined>(undefined)
   const [deckVisible, setDeckVisible] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
@@ -31,10 +33,10 @@ export default function ChatPage() {
       lowerMsg.includes('where is the file') ||
       lowerMsg.includes('document location')
 
-    if (isFilePathQuery && pdfFiles[selectedIndex]?.fullPath) {
+    if (isFilePathQuery && filePath) {
       setMessages((prev) => {
         const newMessages = [...prev]
-        newMessages[newMessages.length - 1].ai = `📁 File is located at:\n\`${pdfFiles[selectedIndex].fullPath}\``
+        newMessages[newMessages.length - 1].ai = `📁 File is located at:\n\`${filePath}\``
         return newMessages
       })
       return
@@ -42,6 +44,10 @@ export default function ChatPage() {
 
     try {
       const formData = new FormData()
+      if (fileName && pdfUrl) {
+        const blob = await fetch(pdfUrl).then((r) => r.blob())
+        formData.append('file', new File([blob], fileName))
+      }
       formData.append('message', userMessage)
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:5000'}/api/rag/chat`, {
@@ -73,6 +79,9 @@ export default function ChatPage() {
     setSelectedIndex(pdfFiles.length) // select the newly added file
     setMessages((prev) => [...prev, { user: '', ai: `📄 Previewing "${name}"` }])
   }
+
+  // Select file from deck
+  const handleSelectFile = (idx: number) => setSelectedIndex(idx)
 
   // Open all in new tab (side by side)
   const handleOpenAll = () => {
@@ -255,6 +264,8 @@ export default function ChatPage() {
                           setSelectedIndex(i)
                           setDeckOpen(false)
                         }}
+                        onMouseEnter={() => setHoveredIndex(i)}
+                        onMouseLeave={() => setHoveredIndex(undefined)}
                         aria-label={f.name}
                       >
                         {f.name}
@@ -267,12 +278,12 @@ export default function ChatPage() {
                     // Deck logic for stacked/tilted view
                     const isTop = i === selectedIndex;
                     const cardSeparation = pdfFiles.length === 2 ? 54 : 22;
-                    const z = 50 - i;
-                    const scale = 1 - 0.04 * Math.abs(i - selectedIndex);
-                    const tilt = (i - selectedIndex) * 8;
-                    const translateX = i * cardSeparation;
-                    const blur = 'none';
-                    const opacity = 1;
+                    let z = 50 - i;
+                    let scale = 1 - 0.04 * Math.abs(i - selectedIndex);
+                    let tilt = (i - selectedIndex) * 8;
+                    let translateX = i * cardSeparation;
+                    let blur = 'none';
+                    let opacity = 1;
                     const width = 100;
                     const shadow = '0 1px 4px 0 rgba(0,0,0,0.08)';
                     return (

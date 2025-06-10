@@ -33,8 +33,8 @@ export async function POST(req: NextRequest) {
     const reply = data.choices?.[0]?.message?.content ?? 'No response from model.'
 
     return NextResponse.json({ response: reply })
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return NextResponse.json({ error: message }, { status: 500 })
+  } catch (err: any) {
+    console.error('❌ LLM Error:', err)
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }

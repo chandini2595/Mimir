@@ -12,21 +12,9 @@ export default function FileUploader({ onUpload }: Props) {
   const [dragging, setDragging] = useState(false)
 
   const handleFile = (file: File) => {
-    // Save file to /test for preview (simulate upload to repo)
-    const formData = new FormData()
-    formData.append('file', file)
-    fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.testPath) {
-          // Use the testPath for preview
-          const previewUrl = `/${data.testPath}`
-          onUpload(previewUrl, file.name, data.testPath)
-        }
-      })
+    const previewUrl = URL.createObjectURL(file)
+    const simulatedPath = `C:/Users/ramac/Documents/Bucket/Mimir/${file.name}`
+    onUpload(previewUrl, file.name, simulatedPath)
   }
 
   const handleChange = () => {
