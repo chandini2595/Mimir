@@ -81,7 +81,3 @@ You must configure the frontend to point to your backend API (see `.env` or `NEX
 - [AWS CloudWatch](https://console.aws.amazon.com/cloudwatch/)
 
 ---
-
-## License
-
-MIT
