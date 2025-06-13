@@ -18,11 +18,13 @@ const ChatWindow: FC<Props> = ({ messages }) => {
               </p>
             </div>
           )}
-          <div className="text-left">
-            <p className="inline-block bg-gray-100 text-gray-800 p-2 rounded">
-              {msg.ai}
-            </p>
-          </div>
+          {msg.ai && (
+            <div className="text-left">
+              <p className="inline-block bg-gray-100 text-gray-800 p-2 rounded">
+                {msg.ai}
+              </p>
+            </div>
+          )}
         </div>
       ))}
     </div>

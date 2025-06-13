@@ -8,11 +8,10 @@ import { useEffect, useState } from 'react'
 interface Props {
   url: string | null
   fileName: string | null
-  zoom?: number // optional zoom prop
+  zoom?: number 
 }
 
 const PDFViewer = ({ url, fileName, zoom = 100 }: Props) => {
-  // Calculate scale: 1 means fit to width, otherwise use zoom
   const [fitToWidth, setFitToWidth] = useState(true)
   useEffect(() => {
     setFitToWidth(zoom === 100)
@@ -26,7 +25,6 @@ const PDFViewer = ({ url, fileName, zoom = 100 }: Props) => {
             <Viewer
               fileUrl={url}
               defaultScale={fitToWidth ? 1 : zoom / 100}
-              // force re-render on zoom change
               key={zoom + '-' + url}
             />
           </div>
@@ -39,13 +37,5 @@ const PDFViewer = ({ url, fileName, zoom = 100 }: Props) => {
     </>
   )
 }
-
-/**
- * Returns the preview URL for a file, using local or S3 path depending on environment.
- *
- * Example usage in a component:
- * const previewUrl = getFilePreviewUrl(s3Key);
- * <iframe src={previewUrl} ... />
- */
 
 export default PDFViewer
