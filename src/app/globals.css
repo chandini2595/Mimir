@@ -178,3 +178,110 @@
 .flare-out .welcome-flare-piece:nth-child(2) {
   animation-delay: 0.2s;
 }
+
+/* --- Liquid Glass Button Effect (from liquidglass.md, refined for all buttons) --- */
+
+button, .btn-glass, a.btn-glass {
+  position: relative;
+  color: #1e293b;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1.5px solid rgba(255, 255, 255, 0.55);
+  border-radius: 0.75rem;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.10), 0 2px 8px 0 rgba(0,0,0,0.08);
+  backdrop-filter: blur(6px) saturate(180%);
+  -webkit-backdrop-filter: blur(6px) saturate(180%);
+  padding: 0.38rem 0.85rem; /* smaller vertical/horizontal padding */
+  font-weight: 600;
+  font-family: inherit;
+  font-size: 0.85rem; /* smaller font */
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(.4,2,.6,1);
+  outline: none;
+  text-decoration: none;
+  z-index: 1;
+  overflow: hidden;
+  min-height: 2.1rem;
+  min-width: 2.1rem;
+  line-height: 1.1;
+}
+
+button svg, .btn-glass svg, a.btn-glass svg {
+  width: 0.95em;
+  height: 0.95em;
+  vertical-align: middle;
+  display: inline-block;
+  fill: currentColor;
+  stroke: currentColor;
+  color: #2563eb;
+  filter: none !important;
+  /* Ensures icon is always visible and not blurred */
+}
+
+/* Specifically target arrow icons inside buttons and make them larger and more visible */
+button svg.arrow, .btn-glass svg.arrow, a.btn-glass svg.arrow,
+button svg.icon-arrow, .btn-glass svg.icon-arrow, a.btn-glass svg.icon-arrow {
+  width: 1.35em;
+  height: 1.35em;
+  color: #1e293b;
+  stroke-width: 2.2;
+  filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 1.5px #2563eb);
+}
+
+button::after, .btn-glass::after, a.btn-glass::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(120deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.08) 100%);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+button:hover, .btn-glass:hover, a.btn-glass:hover {
+  background: rgba(255,255,255,0.32);
+  box-shadow: 0 12px 40px 0 rgba(80,120,255,0.18), 0 2px 12px 0 rgba(0,0,0,0.13);
+  border-color: #a5b4fc;
+  color: #2563eb;
+  transform: scale(1.045);
+}
+
+button:active, .btn-glass:active, a.btn-glass:active {
+  transform: scale(0.98);
+  box-shadow: 0 4px 16px 0 rgba(80,120,255,0.10);
+}
+
+/* For white backgrounds, add a subtle border and shadow for contrast */
+button, .btn-glass, a.btn-glass {
+  border: 1.5px solid rgba(180, 200, 255, 0.22);
+  box-shadow: 0 2px 8px 0 rgba(120,180,255,0.10), 0 1.5px 6px 0 rgba(0,0,0,0.06);
+}
+
+/* Remove default button background for consistency */
+button {
+  background: none;
+}
+
+/* Optional: add a glassy focus ring */
+button:focus, .btn-glass:focus, a.btn-glass:focus {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(96,165,250,0.18);
+}
+
+/* --- End Liquid Glass Button Effect --- */
+
+.send-arrow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  width: 1.2em !important;
+  height: 1.2em !important;
+  color: #2563eb !important;
+  stroke: #2563eb !important;
+  stroke-width: 2.2;
+  filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 1.5px #2563eb);
+  pointer-events: none;
+}
