@@ -5,28 +5,17 @@ import dynamic from 'next/dynamic'
 import Sidebar from '@/components/Sidebar'
 import ChatWindow from '@/components/ChatWindow'
 import ChatInput from '@/components/ChatInput'
-<<<<<<< HEAD
-import PreviewDropdown from '@/components/PreviewDropdown'
 import MultiSelectDropdown from '@/components/MultiSelectDropdown'
 import { openPreviewTab } from '@/lib/utils'
-import { AuthProvider, useAuth } from '@/contexts/AuthContext'
-
-const PDFViewer = dynamic(() => import('@/components/PDFViewer'), { ssr: false });
-
-function ChatPageContent() {
-  const { user, loading } = useAuth();
-
-=======
-import MultiSelectDropdown from '@/components/MultiSelectDropdown' 
-import { openPreviewTab } from '@/lib/utils' 
 import PreviewSidebar from '@/components/PreviewSidebar'
+import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 
 const PDFViewer = dynamic(() => import('@/components/PDFViewer'), { ssr: false });
 
 const PREVIEW_SIDEBAR_WIDTH = 240;
 
-export default function ChatPage() {
->>>>>>> 6716ccf145040de90dccf6c46a68ab7f3d29da45
+function ChatPageContent() {
+  const { user, loading } = useAuth();
   // State
   const [messages, setMessages] = useState<{ user: string; ai: string }[]>([])
   const [showPreview, setShowPreview] = useState(false)
@@ -87,9 +76,31 @@ export default function ChatPage() {
       }
     };
     window.addEventListener('wheel', handleWheel, { passive: false });
-    return () => window.removeEventListener('wheel', handleWheel);
-  }, [showPreview]);
+    return () => window.removeEventListener('wheel', handleWheel);  }, [showPreview]);
 
+  // Additional useEffect hooks MUST be before conditional returns
+  useEffect(() => {
+    if (naturalPdfWidth > 0) {
+      const newPdfWidth = (naturalPdfWidth * (zoom / 100)) + 40;
+      setPreviewWidth(Math.max(250, Math.min(newPdfWidth, 900)));
+    }
+  }, [zoom, naturalPdfWidth]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowFileSelect(false);
+      }
+    }
+    if (showFileSelect) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showFileSelect]);
+
+  // Conditional returns MUST be after ALL hooks
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -154,63 +165,9 @@ export default function ChatPage() {
         } else {
           alert("Only PDF files can be uploaded.");
         }
-      }
-    }
+      }    }
   };
 
-<<<<<<< HEAD
-=======
-  // useEffect hooks
-  useEffect(() => {
-    if (pdfFiles.length > 0 && !activePreviewFile) {
-      selectFileForPreview(pdfFiles[0]);
-    }
-  }, [pdfFiles, activePreviewFile]);
-
-  useEffect(() => {
-    const handleMouseMoveGlobal = (e: MouseEvent) => {
-      if (!isDragging) return;
-      const newWidth = window.innerWidth - e.clientX - (isPreviewSidebarOpen ? PREVIEW_SIDEBAR_WIDTH : 0);
-      if (newWidth >= 250 && newWidth <= 900) {
-        setPreviewWidth(newWidth);
-      }
-    };
-    const handleMouseUpGlobal = () => {
-      setIsDragging(false);
-    };
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMoveGlobal);
-      window.addEventListener('mouseup', handleMouseUpGlobal);
-    }
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMoveGlobal);
-      window.removeEventListener('mouseup', handleMouseUpGlobal);
-    };
-  }, [isDragging, isPreviewSidebarOpen]);
-
-  useEffect(() => {
-    if (naturalPdfWidth > 0) {
-      const newPdfWidth = (naturalPdfWidth * (zoom / 100)) + 40;
-      setPreviewWidth(Math.max(250, Math.min(newPdfWidth, 900)));
-    }
-  }, [zoom, naturalPdfWidth]);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowFileSelect(false);
-      }
-    }
-    if (showFileSelect) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showFileSelect]); 
-
-
->>>>>>> 6716ccf145040de90dccf6c46a68ab7f3d29da45
   return (
     <main className="flex h-screen overflow-hidden" style={{ fontFamily: 'Fira Mono, JetBrains Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', fontSize: '14px' }}>
       
@@ -333,12 +290,7 @@ export default function ChatPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
                   </svg>
                 </button>
-              )}
-            </div>
-<<<<<<< HEAD
-          )}
-        </div>      </div>
-=======
+              )}            </div>
             
             <div className="flex items-center gap-2 px-2 py-2 border-b bg-gray-50/80">
               <label className="text-xs">Zoom:</label>
@@ -374,7 +326,6 @@ export default function ChatPage() {
           </div>
         </div>
       </div>
->>>>>>> 6716ccf145040de90dccf6c46a68ab7f3d29da45
     </main>
   );
 }
