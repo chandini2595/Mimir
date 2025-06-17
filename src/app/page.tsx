@@ -1,17 +1,17 @@
-// src/app/page.tsx
-
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import Sidebar from '@/components/Sidebar'
 import ChatWindow from '@/components/ChatWindow'
 import ChatInput from '@/components/ChatInput'
-import PreviewDropdown from '@/components/PreviewDropdown'
-import MultiSelectDropdown from '@/components/MultiSelectDropdown'
-import { openPreviewTab } from '@/lib/utils'
+import MultiSelectDropdown from '@/components/MultiSelectDropdown' 
+import { openPreviewTab } from '@/lib/utils' 
+import PreviewSidebar from '@/components/PreviewSidebar'
 
 const PDFViewer = dynamic(() => import('@/components/PDFViewer'), { ssr: false });
+
+const PREVIEW_SIDEBAR_WIDTH = 240;
 
 export default function ChatPage() {
   // State
@@ -22,51 +22,54 @@ export default function ChatPage() {
   const [zoom, setZoom] = useState(100)
   const [pdfFiles, setPdfFiles] = useState<Array<{ url: string, name: string, fullPath: string }>>([])
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [showMultiSelectDropdown, setShowMultiSelectDropdown] = useState(false);
   const [activePreviewFile, setActivePreviewFile] = useState<{ url: string, name: string } | null>(null);
-  const [showFileSwitcher, setShowFileSwitcher] = useState(false);
-  const [isDraggingOver, setIsDraggingOver] = useState(false); // State for drag-and-drop
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [showFileSelect, setShowFileSelect] = useState(false);
+  const [naturalPdfWidth, setNaturalPdfWidth] = useState(0);
+  const [isPreviewSidebarOpen, setIsPreviewSidebarOpen] = useState(false);
+
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Handlers
+  const selectFileForPreview = (file: { url: string; name: string }) => {
+    setActivePreviewFile(file);
+    if (!showPreview) {
+      setShowPreview(true);
+    }
+  };
+
   const handleResponse = async (userMessage: string) => { 
     setMessages((prev) => [...prev, { user: userMessage, ai: '...' }]);
-    // ...rest of your fetch logic
   };
 
   const handleUpload = (url: string, name: string, fullPath: string) => {
     const newFile = { url, name, fullPath };
     setPdfFiles((prev) => [...prev, newFile]);
-
     if (pdfFiles.length === 0) {
-      const defaultWidth = Math.min(window.innerWidth * 0.35, 900);
-      setPreviewWidth(defaultWidth);
-      setActivePreviewFile(newFile);
-      setShowPreview(true);
+      selectFileForPreview(newFile);
     }
   };
 
-  const handlePreviewAllClick = () => {
-    if (pdfFiles.length >= 2 && pdfFiles.length <= 3) {
-      openPreviewTab(pdfFiles);
-    } else if (pdfFiles.length > 3) {
-      setShowMultiSelectDropdown(prev => !prev);
+  const handleFileSelectConfirm = (selectedFiles: Array<{ url: string; name: string }>) => {
+    setShowFileSelect(false); 
+    if (selectedFiles.length === 1) {
+      selectFileForPreview(selectedFiles[0]);
+    } else if (selectedFiles.length === 2 || selectedFiles.length === 3) {
+      openPreviewTab(selectedFiles);
     }
+  };
+  
+  const handlePdfWidthChange = (naturalWidth: number) => {
+    setNaturalPdfWidth(naturalWidth);
+    const newPdfWidth = (naturalWidth * (zoom / 100)) + 40;
+    setPreviewWidth(Math.max(250, Math.min(newPdfWidth, 900)));
   };
 
   const handleMouseDown = () => setIsDragging(true);
 
-  // Drag-and-Drop Handlers
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
-  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDraggingOver(true);
-  };
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setIsDraggingOver(false);
-  };
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); };
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDraggingOver(true); };
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDraggingOver(false); };
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDraggingOver(false);
@@ -86,17 +89,14 @@ export default function ChatPage() {
   // useEffect hooks
   useEffect(() => {
     if (pdfFiles.length > 0 && !activePreviewFile) {
-      const defaultWidth = Math.min(window.innerWidth * 0.35, 900);
-      setPreviewWidth(defaultWidth);
-      setActivePreviewFile(pdfFiles[0])
-      setShowPreview(true)
+      selectFileForPreview(pdfFiles[0]);
     }
   }, [pdfFiles, activePreviewFile]);
 
   useEffect(() => {
     const handleMouseMoveGlobal = (e: MouseEvent) => {
       if (!isDragging) return;
-      const newWidth = window.innerWidth - e.clientX;
+      const newWidth = window.innerWidth - e.clientX - (isPreviewSidebarOpen ? PREVIEW_SIDEBAR_WIDTH : 0);
       if (newWidth >= 250 && newWidth <= 900) {
         setPreviewWidth(newWidth);
       }
@@ -112,23 +112,29 @@ export default function ChatPage() {
       window.removeEventListener('mousemove', handleMouseMoveGlobal);
       window.removeEventListener('mouseup', handleMouseUpGlobal);
     };
-  }, [isDragging]);
+  }, [isDragging, isPreviewSidebarOpen]);
 
   useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      if (showPreview && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        setZoom((prev) => {
-          let next = prev - Math.sign(e.deltaY) * 10;
-          if (next < 25) next = 25;
-          if (next > 300) next = 300;
-          return next;
-        });
+    if (naturalPdfWidth > 0) {
+      const newPdfWidth = (naturalPdfWidth * (zoom / 100)) + 40;
+      setPreviewWidth(Math.max(250, Math.min(newPdfWidth, 900)));
+    }
+  }, [zoom, naturalPdfWidth]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowFileSelect(false);
       }
+    }
+    if (showFileSelect) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    return () => window.removeEventListener('wheel', handleWheel);
-  }, [showPreview]);
+  }, [showFileSelect]); 
+
 
   return (
     <main className="flex h-screen overflow-hidden" style={{ fontFamily: 'Fira Mono, JetBrains Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', fontSize: '14px' }}>
@@ -138,7 +144,6 @@ export default function ChatPage() {
           {sidebarOpen && <Sidebar fileName={activePreviewFile?.name} onClose={() => setSidebarOpen(false)} />}
         </div>
       </div>
-
       <div 
         className="flex flex-col flex-1 relative"
         onDragEnter={handleDragEnter}
@@ -153,7 +158,6 @@ export default function ChatPage() {
             </div>
           </div>
         )}
-
         <div className="flex items-center gap-4 px-6 py-4 bg-white/80 shadow-sm relative z-30" style={{ borderBottom: 'none', boxShadow: 'none', background: 'rgba(255,255,255,0.85)' }}>
           {!sidebarOpen && (
             <button 
@@ -169,94 +173,126 @@ export default function ChatPage() {
               </span>
             </button>
           )}
-          
           <div className="flex-grow"></div>
-
           <div className="flex gap-2 ml-auto" style={{ zIndex: 50 }}>
-            <div className="relative">
-              <button onClick={handlePreviewAllClick} disabled={pdfFiles.length < 2} className="w-48 justify-center px-3 py-2 rounded-xl border-0 bg-white/80 text-xs font-semibold shadow-[0_2px_12px_0_rgba(120,180,255,0.13),0_1px_4px_0_rgba(0,0,0,0.08)] hover:bg-white/90 backdrop-blur-lg transition-all duration-400 ring-1 ring-blue-100 focus:ring-2 focus:ring-blue-200 flex items-center gap-1 disabled:opacity-50">
-                {pdfFiles.length > 3 ? 'Select to Preview All...' : `Preview All (${pdfFiles.length})`}
-              </button>
-              {showMultiSelectDropdown && (
+            <div className="relative" ref={dropdownRef}>
+              <div className="flex items-center">
+                <button
+                  onClick={() => {
+                    setShowPreview(prev => !prev);
+                    setShowFileSelect(false); 
+                  }}
+                  disabled={pdfFiles.length === 0}
+                  className={`justify-center bg-white/80 border-0 rounded-lg shadow text-xs backdrop-blur-md transition-all duration-300 active:scale-95 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 animate-in disabled:opacity-50 font-semibold flex items-center ${showPreview ? 'w-10 h-10 p-2' : 'w-48 p-3'} ${pdfFiles.length > 1 && !showPreview ? 'rounded-r-none' : ''}`}
+                >
+                  {showPreview ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="transition-transform duration-200">
+                      <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
+                    </svg>
+                  ) : (
+                    pdfFiles.length > 1 ? `Show Preview (${pdfFiles.length})` : 'Show Preview'
+                  )}
+                </button>
+                {pdfFiles.length > 1 && !showPreview && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowFileSelect(prev => !prev);
+                    }}
+                    className="p-3 bg-white/80 border-0 rounded-r-lg shadow text-xs backdrop-blur-md transition-all duration-300 active:scale-95 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  >
+                    <svg className={`w-4 h-4 transition-transform duration-200 ${showFileSelect ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              {showFileSelect && (
                 <MultiSelectDropdown
                   allFiles={pdfFiles}
-                  onConfirm={(selectedFiles) => {
-                    openPreviewTab(selectedFiles);
-                    setShowMultiSelectDropdown(false);
-                  }}
+                  onConfirm={handleFileSelectConfirm}
                 />
               )}
             </div>
-            <button
-              onClick={() => setShowPreview(prev => !prev)}
-              disabled={pdfFiles.length === 0}
-              className={`justify-center bg-white/80 border-0 rounded-lg shadow text-xs backdrop-blur-md transition-all duration-300 active:scale-95 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 animate-in disabled:opacity-50 font-semibold flex items-center ${showPreview ? 'w-10 h-10 p-2' : 'w-48 p-3'}`}
-            >
-              {showPreview ? (
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="transition-transform duration-200">
-                  <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                </svg>
-              ) : (
-                'Show Preview'
-              )}
-            </button>
           </div>
         </div>
-
         <ChatWindow messages={messages} />
         <ChatInput onResponse={handleResponse} onUpload={handleUpload} />
       </div>
 
-      <div className={`h-screen hidden md:flex flex-col border-l bg-white/60 shadow-2xl backdrop-blur-lg ${showPreview ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'}`} style={{ width: showPreview ? previewWidth : 0, minWidth: showPreview ? 250 : 0, maxWidth: 900, position: 'relative', zIndex: 30, overflow: 'hidden' }}>
+      
+      <div 
+        className={`h-screen hidden md:flex border-l bg-white/60 shadow-2xl backdrop-blur-lg ${showPreview ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
+        style={{ 
+          width: showPreview ? previewWidth + (isPreviewSidebarOpen ? PREVIEW_SIDEBAR_WIDTH : 0) : 0, 
+          minWidth: showPreview ? 250 : 0, 
+          maxWidth: 900 + PREVIEW_SIDEBAR_WIDTH, 
+          position: 'relative', 
+          zIndex: 30, 
+          overflow: 'hidden', 
+          transition: 'width 0.3s ease-in-out, opacity 0.3s ease-in-out'
+        }}
+      >
         {showPreview && (
           <div onMouseDown={handleMouseDown} className="absolute left-0 top-0 h-full w-[6px] cursor-col-resize bg-gray-300 hover:bg-gray-400 z-40" style={{ userSelect: 'none' }} />
         )}
         
-        <div 
-          className="p-2 font-semibold border-b flex items-center justify-between relative"
-        >
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="text-slate-600 text-sm flex-shrink-0">Previewing:</span>
-            <strong className="text-slate-900 text-sm truncate">{activePreviewFile?.name || '...'}</strong>
-            
-            {pdfFiles.length > 1 && (
-              <div className="relative">
-                  <button 
-                    onClick={() => setShowFileSwitcher(prev => !prev)}
-                    className="flex-shrink-0 ml-1 flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-800 p-1 rounded-md hover:bg-slate-100 transition-colors"
-                  >
-                    Switch
-                    <svg className={`w-4 h-4 transition-transform duration-200 ${showFileSwitcher ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                    </svg>
-                  </button>
-                  {showFileSwitcher && (
-                    <PreviewDropdown
-                        files={pdfFiles}
-                        onFileSelect={(file) => {
-                          setActivePreviewFile(file);
-                          setShowFileSwitcher(false);
-                        }}
-                      />
-                  )}
+        <div className="flex w-full">
+          <div
+            className="flex-1 flex flex-col h-screen overflow-hidden"
+            style={{ width: previewWidth }}
+          >
+            <div className="p-2 font-semibold border-b flex items-center justify-between relative">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-slate-600 text-sm flex-shrink-0">Previewing:</span>
+                <strong className="text-slate-900 text-sm truncate">{activePreviewFile?.name || '...'}</strong>
               </div>
-            )}
-          </div>
-        </div>
-        
-        <div className="flex items-center gap-2 px-2 py-2 border-b bg-gray-50/80">
-          <label className="text-xs">Zoom:</label>
-          <input type="number" className="w-[60px] px-2 py-1 text-sm border rounded" value={zoom} min={25} max={300} onChange={(e) => setZoom(Number(e.target.value))} />
-          <span className="text-xs">%</span>
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          {activePreviewFile ? (
-            <PDFViewer url={activePreviewFile.url} fileName={activePreviewFile.name} zoom={zoom} />
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-sm">
-              (No document loaded)
+              
+              {pdfFiles.length > 1 && !isPreviewSidebarOpen && (
+                <button 
+                  onClick={() => setIsPreviewSidebarOpen(true)} 
+                  className="p-1 rounded-full hover:bg-slate-200 transition-colors"
+                  aria-label="Open document list"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                </button>
+              )}
             </div>
-          )}
+            
+            <div className="flex items-center gap-2 px-2 py-2 border-b bg-gray-50/80">
+              <label className="text-xs">Zoom:</label>
+              <input type="number" className="w-[60px] px-2 py-1 text-sm border rounded" value={zoom} min={25} max={300} onChange={(e) => setZoom(Number(e.target.value))} />
+              <span className="text-xs">%</span>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto">
+              {activePreviewFile ? (
+                <PDFViewer
+                  url={activePreviewFile.url}
+                  fileName={activePreviewFile.name}
+                  zoom={zoom}
+                  onWidthChange={handlePdfWidthChange}
+                />
+              ) : (
+                <div className="flex-1 flex items-center justify-center text-sm">
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div
+            className="transition-all duration-300 ease-in-out"
+            style={{ width: isPreviewSidebarOpen ? PREVIEW_SIDEBAR_WIDTH : 0, overflow: 'hidden' }}
+          >
+            <PreviewSidebar
+              files={pdfFiles}
+              activeFileName={activePreviewFile?.name}
+              onFileSelect={selectFileForPreview}
+              onClose={() => setIsPreviewSidebarOpen(false)}
+            />
+          </div>
         </div>
       </div>
     </main>

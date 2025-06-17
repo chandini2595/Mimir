@@ -178,3 +178,11 @@
 .flare-out .welcome-flare-piece:nth-child(2) {
   animation-delay: 0.2s;
 }
+
+.rpv-default-layout__toolbar {
+  display: none !important;
+}
+
+.rpv-default-layout__main {
+  height: 100% !important;
+}

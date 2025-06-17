@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from 'react';
 
 interface File {
@@ -59,7 +60,7 @@ const MultiSelectDropdown = ({ allFiles, onConfirm }: Props) => {
             disabled={selected.length === 0}
             className="w-full px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
           >
-            Preview Selected ({selected.length})
+            Confirm Selection ({selected.length})
           </button>
         </div>
       </div>
