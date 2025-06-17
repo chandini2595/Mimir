@@ -1,4 +1,5 @@
 import React from 'react';
+import { useAuth } from '../contexts/AuthContext';
 
 interface SidebarProps {
   fileName: string | null | undefined;
@@ -6,6 +7,8 @@ interface SidebarProps {
 }
 
 const Sidebar = ({ fileName, onClose }: SidebarProps) => {
+  const { user, signOut } = useAuth();
+
   return (
     <div className="flex flex-col h-full text-slate-700">
       <div className="flex items-center justify-between p-4 border-b border-slate-200/80">
@@ -24,7 +27,7 @@ const Sidebar = ({ fileName, onClose }: SidebarProps) => {
       <div className="p-4 space-y-4">
         <div>
           <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Welcome</h2>
-          <p className="text-sm text-slate-800">Ram</p>
+          <p className="text-sm text-slate-800">{user?.firstName || 'User'}</p>
         </div>
         <div>
           <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Active File</h2>
@@ -32,8 +35,14 @@ const Sidebar = ({ fileName, onClose }: SidebarProps) => {
             {fileName || 'No document uploaded'}
           </p>
         </div>
+        <div className="mt-6">
+          <button            onClick={signOut}
+            className="w-full px-3 py-2 text-sm text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+          >
+            Sign Out
+          </button>
+        </div>
       </div>
-      
     </div>
   );
 };

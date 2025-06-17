@@ -285,3 +285,200 @@ button:focus, .btn-glass:focus, a.btn-glass:focus {
   filter: drop-shadow(0 0 2px #fff) drop-shadow(0 0 1.5px #2563eb);
   pointer-events: none;
 }
+
+.glass-hue-green {
+  background: linear-gradient(90deg, rgba(120,255,180,0.32) 0%, rgba(255,255,255,0.45) 100%) !important;
+  border: 1.5px solid rgba(120,255,180,0.22);
+  box-shadow: 0 4px 24px 0 rgba(120,255,180,0.18), 0 1.5px 8px 0 rgba(0,0,0,0.08), 0 0 0 8px rgba(120,255,180,0.08) inset;
+  backdrop-filter: blur(18px) saturate(2.2);
+  -webkit-backdrop-filter: blur(18px) saturate(2.2);
+  transition: background 0.5s cubic-bezier(.4,2,.6,1), box-shadow 0.5s cubic-bezier(.4,2,.6,1), border 0.5s cubic-bezier(.4,2,.6,1);
+}
+.glass-hue-red {
+  background: linear-gradient(90deg, rgba(255,120,120,0.32) 0%, rgba(255,255,255,0.45) 100%) !important;
+  border: 1.5px solid rgba(255,120,120,0.22);
+  box-shadow: 0 4px 24px 0 rgba(255,120,120,0.18), 0 1.5px 8px 0 rgba(0,0,0,0.08), 0 0 0 8px rgba(255,120,120,0.08) inset;
+  backdrop-filter: blur(18px) saturate(2.2);
+  -webkit-backdrop-filter: blur(18px) saturate(2.2);
+  transition: background 0.5s cubic-bezier(.4,2,.6,1), box-shadow 0.5s cubic-bezier(.4,2,.6,1), border 0.5s cubic-bezier(.4,2,.6,1);
+}
+
+.glass-input {
+  background: linear-gradient(135deg, rgba(173,216,230,0.18) 0%, rgba(255,255,255,0.35) 100%) !important;
+  border: 1.5px solid rgba(180, 200, 255, 0.22);
+  box-shadow: 0 2px 8px 0 rgba(120,180,255,0.10), 0 1.5px 6px 0 rgba(0,0,0,0.06);
+  backdrop-filter: blur(8px) saturate(1.5);
+  -webkit-backdrop-filter: blur(8px) saturate(1.5);
+  transition: background 0.3s, box-shadow 0.3s, border 0.3s;
+}
+
+/* ========== LIQUID GLASS EFFECT (Based on liquidglass.md) ========== */
+
+/* SVG Filter for glass distortion */
+.glass-distortion-filter {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* Base liquid glass input */
+.liquid-glass-input {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.875rem;
+  height: 2.75rem;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 8px 32px rgba(31, 38, 135, 0.37),
+    0 4px 16px rgba(31, 38, 135, 0.09);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+  backdrop-filter: blur(40px) saturate(180%);
+  -webkit-backdrop-filter: blur(40px) saturate(180%);
+}
+
+/* Wavy border gradient effect */
+.liquid-glass-input::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(45deg, 
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.1) 15%,
+    rgba(255, 255, 255, 0.4) 30%,
+    rgba(255, 255, 255, 0.05) 45%,
+    rgba(255, 255, 255, 0.5) 60%,
+    rgba(255, 255, 255, 0.08) 75%,
+    rgba(255, 255, 255, 0.6) 100%);
+  background-size: 300% 300%;
+  animation: liquidBorder 6s ease-in-out infinite;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: subtract;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: subtract;
+}
+
+@keyframes liquidBorder {
+  0%, 100% { background-position: 0% 50%; }
+  25% { background-position: 100% 30%; }
+  50% { background-position: 100% 70%; }
+  75% { background-position: 0% 70%; }
+}
+
+/* Inner glass layer */
+.liquid-glass-input::after {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: calc(0.875rem - 2px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Specular highlight layer */
+.liquid-glass-input .glass-specular {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  overflow: hidden;
+  box-shadow: 
+    inset 1px 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 0 8px rgba(255, 255, 255, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  pointer-events: none;
+}
+
+/* Input content layer */
+.liquid-glass-input input {
+  position: relative;
+  z-index: 3;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+  height: 100%;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.liquid-glass-input input::placeholder {
+  color: rgba(30, 41, 59, 0.6);
+}
+
+/* Green variant */
+.liquid-glass-green::after {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+}
+
+.liquid-glass-green {
+  border-color: rgba(34, 197, 94, 0.4);
+  box-shadow: 
+    0 8px 32px rgba(34, 197, 94, 0.25),
+    0 4px 16px rgba(34, 197, 94, 0.15),
+    inset 0 0 0 1px rgba(34, 197, 94, 0.2);
+}
+
+/* Red variant */
+.liquid-glass-red::after {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+}
+
+.liquid-glass-red {
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 
+    0 8px 32px rgba(239, 68, 68, 0.25),
+    0 4px 16px rgba(239, 68, 68, 0.15),
+    inset 0 0 0 1px rgba(239, 68, 68, 0.2);
+}
+
+/* ========== END LIQUID GLASS EFFECT ========== */
+
+/* ========== LIQUID GLASS CARD (for dev-gift) ========== */
+.liquid-glass-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.13);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.18), 0 4px 16px rgba(31, 38, 135, 0.09);
+  border: none;
+  min-width: 340px;
+  min-height: 320px;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  transition: box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 2.2);
+}
+.liquid-glass-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(120deg, rgba(120,180,255,0.18) 0%, rgba(255,255,255,0.22) 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+.liquid-glass-card .glass-specular {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  box-shadow: inset 1px 1px 0 rgba(255,255,255,0.7), inset 0 0 8px rgba(255,255,255,0.5);
+  pointer-events: none;
+}
+.liquid-glass-card > * {
+  position: relative;
+  z-index: 2;
+}
+/* ========== END LIQUID GLASS CARD ========== */

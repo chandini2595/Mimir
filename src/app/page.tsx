@@ -10,10 +10,13 @@ import ChatInput from '@/components/ChatInput'
 import PreviewDropdown from '@/components/PreviewDropdown'
 import MultiSelectDropdown from '@/components/MultiSelectDropdown'
 import { openPreviewTab } from '@/lib/utils'
+import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 
 const PDFViewer = dynamic(() => import('@/components/PDFViewer'), { ssr: false });
 
-export default function ChatPage() {
+function ChatPageContent() {
+  const { user, loading } = useAuth();
+
   // State
   const [messages, setMessages] = useState<{ user: string; ai: string }[]>([])
   const [showPreview, setShowPreview] = useState(false)
@@ -26,6 +29,65 @@ export default function ChatPage() {
   const [activePreviewFile, setActivePreviewFile] = useState<{ url: string, name: string } | null>(null);
   const [showFileSwitcher, setShowFileSwitcher] = useState(false);
   const [isDraggingOver, setIsDraggingOver] = useState(false); // State for drag-and-drop
+
+  // useEffect hooks (must be before any return)
+  useEffect(() => {
+    if (pdfFiles.length > 0 && !activePreviewFile) {
+      const defaultWidth = Math.min(window.innerWidth * 0.35, 900);
+      setPreviewWidth(defaultWidth);
+      setActivePreviewFile(pdfFiles[0])
+      setShowPreview(true)
+    }
+  }, [pdfFiles, activePreviewFile]);
+
+  useEffect(() => {
+    const handleMouseMoveGlobal = (e: MouseEvent) => {
+      if (!isDragging) return;
+      const newWidth = window.innerWidth - e.clientX;
+      if (newWidth >= 250 && newWidth <= 900) {
+        setPreviewWidth(newWidth);
+      }
+    };
+    const handleMouseUpGlobal = () => {
+      setIsDragging(false);
+    };
+    if (isDragging) {
+      window.addEventListener('mousemove', handleMouseMoveGlobal);
+      window.addEventListener('mouseup', handleMouseUpGlobal);
+    }
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMoveGlobal);
+      window.removeEventListener('mouseup', handleMouseUpGlobal);
+    };
+  }, [isDragging]);
+
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (showPreview && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        setZoom((prev) => {
+          let next = prev - Math.sign(e.deltaY) * 10;
+          if (next < 25) next = 25;
+          if (next > 300) next = 300;
+          return next;
+        });
+      }
+    };
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    return () => window.removeEventListener('wheel', handleWheel);
+  }, [showPreview]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-lg">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // AuthProvider will redirect to signin
+  }
 
   // Handlers
   const handleResponse = async (userMessage: string) => { 
@@ -82,53 +144,6 @@ export default function ChatPage() {
       }
     }
   };
-
-  // useEffect hooks
-  useEffect(() => {
-    if (pdfFiles.length > 0 && !activePreviewFile) {
-      const defaultWidth = Math.min(window.innerWidth * 0.35, 900);
-      setPreviewWidth(defaultWidth);
-      setActivePreviewFile(pdfFiles[0])
-      setShowPreview(true)
-    }
-  }, [pdfFiles, activePreviewFile]);
-
-  useEffect(() => {
-    const handleMouseMoveGlobal = (e: MouseEvent) => {
-      if (!isDragging) return;
-      const newWidth = window.innerWidth - e.clientX;
-      if (newWidth >= 250 && newWidth <= 900) {
-        setPreviewWidth(newWidth);
-      }
-    };
-    const handleMouseUpGlobal = () => {
-      setIsDragging(false);
-    };
-    if (isDragging) {
-      window.addEventListener('mousemove', handleMouseMoveGlobal);
-      window.addEventListener('mouseup', handleMouseUpGlobal);
-    }
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMoveGlobal);
-      window.removeEventListener('mouseup', handleMouseUpGlobal);
-    };
-  }, [isDragging]);
-
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      if (showPreview && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        setZoom((prev) => {
-          let next = prev - Math.sign(e.deltaY) * 10;
-          if (next < 25) next = 25;
-          if (next > 300) next = 300;
-          return next;
-        });
-      }
-    };
-    window.addEventListener('wheel', handleWheel, { passive: false });
-    return () => window.removeEventListener('wheel', handleWheel);
-  }, [showPreview]);
 
   return (
     <main className="flex h-screen overflow-hidden" style={{ fontFamily: 'Fira Mono, JetBrains Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', fontSize: '14px' }}>
@@ -257,8 +272,15 @@ export default function ChatPage() {
               (No document loaded)
             </div>
           )}
-        </div>
-      </div>
+        </div>      </div>
     </main>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <AuthProvider>
+      <ChatPageContent />
+    </AuthProvider>
   );
 }
