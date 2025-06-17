@@ -297,15 +297,14 @@ function ChatPageContent() {
               <input type="number" className="w-[60px] px-2 py-1 text-sm border rounded" value={zoom} min={25} max={300} onChange={(e) => setZoom(Number(e.target.value))} />
               <span className="text-xs">%</span>
             </div>
-            
-            <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-hidden">
               {activePreviewFile ? (
-                <PDFViewer
-                  url={activePreviewFile.url}
-                  fileName={activePreviewFile.name}
-                  zoom={zoom}
-                  onWidthChange={handlePdfWidthChange}
-                />
+                <div className="h-full flex flex-col">                  <PDFViewer
+                    url={activePreviewFile.url}
+                    zoom={zoom}
+                    onWidthChange={handlePdfWidthChange}
+                  />
+                </div>
               ) : (
                 <div className="flex-1 flex items-center justify-center text-sm">
                 </div>

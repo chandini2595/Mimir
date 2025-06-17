@@ -490,3 +490,128 @@ button:focus, .btn-glass:focus, a.btn-glass:focus {
   z-index: 2;
 }
 /* ========== END LIQUID GLASS CARD ========== */
+
+/* ========== PDF VIEWER GLASSMORPHIC STYLING ========== */
+
+/* Style the PDF viewer toolbar */
+.rpv-default-layout__toolbar {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  border-bottom: 1px solid rgba(59, 130, 246, 0.1) !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Style PDF viewer toolbar buttons */
+.rpv-default-layout__toolbar button {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+  color: #374151 !important;
+}
+
+.rpv-default-layout__toolbar button:hover {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15) !important;
+}
+
+.rpv-default-layout__toolbar button:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1) !important;
+}
+
+/* Style the zoom input */
+.rpv-zoom__input {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  border-radius: 6px !important;
+}
+
+/* PDF viewer main content area */
+.rpv-default-layout__main {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* Style search input if used */
+.rpv-search__input {
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  border-radius: 8px !important;
+}
+
+/* Style any dropdowns */
+.rpv-core__popover-body {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(59, 130, 246, 0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ========== END PDF VIEWER STYLING ========== */
+
+/* ========== PDF VIEWER TOOLBAR STYLING ========== */
+
+/* Ensure PDF viewer toolbar is visible and properly styled */
+.rpv-default-layout__toolbar {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1) !important;
+  padding: 8px 12px !important;
+  min-height: 48px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  z-index: 10 !important;
+}
+
+/* Style toolbar buttons to match the glassmorphic theme */
+.rpv-default-layout__toolbar button {
+  background: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 6px !important;
+  padding: 6px 10px !important;
+  margin: 0 2px !important;
+  transition: all 0.2s ease !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+.rpv-default-layout__toolbar button:hover {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-color: rgba(59, 130, 246, 0.3) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15) !important;
+}
+
+/* Style the main PDF viewer container */
+.rpv-default-layout__main {
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Ensure PDF viewer has proper height */
+.rpv-core__viewer {
+  flex: 1 !important;
+  height: 100% !important;
+}
+
+/* Style PDF viewer scrollable area */
+.rpv-core__inner-pages {
+  padding: 16px !important;
+  background: rgba(248, 250, 252, 0.8) !important;
+}
+
+/* Style individual PDF pages */
+.rpv-core__inner-page {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  overflow: hidden !important;
+  margin-bottom: 16px !important;
+}
+
+/* ========== END PDF VIEWER TOOLBAR STYLING ========== */
