@@ -1,21 +1,23 @@
 'use client'
 
 import { Worker, Viewer } from '@react-pdf-viewer/core'
+import type { DocumentLoadEvent } from '@react-pdf-viewer/core';
 import '@react-pdf-viewer/core/lib/styles/index.css'
-import { getFilePreviewUrl } from '../lib/utils'
-import { useEffect, useState } from 'react'
 
 interface Props {
   url: string | null
   fileName: string | null
-  zoom?: number 
+  zoom?: number
+  onWidthChange: (width: number) => void;
 }
 
-const PDFViewer = ({ url, fileName, zoom = 100 }: Props) => {
-  const [fitToWidth, setFitToWidth] = useState(true)
-  useEffect(() => {
-    setFitToWidth(zoom === 100)
-  }, [zoom])
+const PDFViewer = ({ url, zoom = 100, onWidthChange }: Props) => {
+
+  const handleDocumentLoad = async (e: DocumentLoadEvent) => {
+    const page = await e.doc.getPage(1);
+    const viewport = page.getViewport({ scale: 1 });
+    onWidthChange(viewport.width);
+  };
 
   return (
     <>
@@ -24,8 +26,9 @@ const PDFViewer = ({ url, fileName, zoom = 100 }: Props) => {
           <div className="flex-1 overflow-y-auto flex justify-center items-start">
             <Viewer
               fileUrl={url}
-              defaultScale={fitToWidth ? 1 : zoom / 100}
-              key={zoom + '-' + url}
+              defaultScale={zoom / 100}
+              onDocumentLoad={handleDocumentLoad}
+              key={`${url}-${zoom}`}
             />
           </div>
         </Worker>

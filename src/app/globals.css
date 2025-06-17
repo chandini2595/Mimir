@@ -179,6 +179,12 @@
   animation-delay: 0.2s;
 }
 
+.rpv-default-layout__toolbar {
+  display: none !important;
+}
+
+.rpv-default-layout__main {
+  height: 100% !important;
 /* --- Liquid Glass Button Effect (from liquidglass.md, refined for all buttons) --- */
 
 button, .btn-glass, a.btn-glass {
