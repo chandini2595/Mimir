@@ -38,13 +38,17 @@ export default function SignIn() {
       data = JSON.parse(rawText);
     } catch (err) {
       // Not JSON, keep rawText
-    }
-    if (res.ok && data) {
+    }    if (res.ok && data) {
+      console.log('Sign-in successful, data received:', data);
       // Store token and user data
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+      console.log('Redirecting to home page...');
       router.push('/');
     } else {
+      console.log('Sign-in failed:', { status: res.status, data, rawText });
       setError((data && data.error) || rawText || 'Sign in failed');
     }
   }

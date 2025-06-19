@@ -8,6 +8,7 @@ interface Props {
 
 const ChatInput = ({ onResponse, onUpload }: Props) => {
   const [message, setMessage] = useState('');
+  const [uploading, setUploading] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -41,11 +42,37 @@ const ChatInput = ({ onResponse, onUpload }: Props) => {
     fileInputRef.current?.click();
   };
   
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const url = URL.createObjectURL(file);
-      onUpload(url, file.name, file.name);
+      setUploading(true);
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error('No authentication token found');
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await fetch('/api/upload/preview', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData,
+        });
+        const data = await res.json();
+        if (res.ok && data.success && data.s3Url) {
+          onUpload(data.s3Url, file.name, data.s3Key);
+        } else {
+          // fallback to local preview if S3 upload fails
+          const url = URL.createObjectURL(file);
+          onUpload(url, file.name, file.name);
+        }
+      } catch (err) {
+        // fallback to local preview on error
+        const url = URL.createObjectURL(file);
+        onUpload(url, file.name, file.name);
+      } finally {
+        setUploading(false);
+      }
     }
   };
 
@@ -63,11 +90,11 @@ const ChatInput = ({ onResponse, onUpload }: Props) => {
         />
         <div className="flex items-center justify-between mt-2">
           <div className="flex items-center gap-2">
-            <button onClick={handleAttachClick} className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-600 bg-white/50 rounded-lg shadow-sm border border-slate-200 hover:bg-slate-100 transition-colors relative">
+            <button onClick={handleAttachClick} className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-600 bg-white/50 rounded-lg shadow-sm border border-slate-200 hover:bg-slate-100 transition-colors relative" disabled={uploading}>
               <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" viewBox="0 0 18 16">
                 <path d="M4.5 3a2.5 2.5 0 0 1 5 0v9a1.5 1.5 0 0 1-3 0V5a.5.5 0 0 1 1 0v7a.5.5 0 0 0 1 0V3a1.5 1.5 0 1 0-3 0v9a2.5 2.5 0 0 0 5 0V5a.5.5 0 0 1 1 0v7a3.5 3.5 0 1 1-7 0V3z"/>
               </svg>
-              Attach
+              {uploading ? 'Uploading...' : 'Attach'}
             </button>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept=".pdf" />
           </div>

@@ -22,7 +22,14 @@ function ChatPageContent() {
   const [previewWidth, setPreviewWidth] = useState(400)
   const [isDragging, setIsDragging] = useState(false)
   const [zoom, setZoom] = useState(100)
-  const [pdfFiles, setPdfFiles] = useState<Array<{ url: string, name: string, fullPath: string }>>([])
+  const [pdfFiles, setPdfFiles] = useState<Array<{
+    url: string,
+    name: string,
+    fullPath: string,
+    s3Key?: string,
+    s3Url?: string,
+    uploadedToS3?: boolean
+  }>>([])
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [activePreviewFile, setActivePreviewFile] = useState<{ url: string, name: string } | null>(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
@@ -124,12 +131,26 @@ function ChatPageContent() {
   const handleResponse = async (userMessage: string) => { 
     setMessages((prev) => [...prev, { user: userMessage, ai: '...' }]);
   };
-
-  const handleUpload = (url: string, name: string, fullPath: string) => {
-    const newFile = { url, name, fullPath };
+  const handleUpload = (url: string, name: string, fullPath: string, s3Info?: { s3Key: string, s3Url: string }) => {
+    // Always prefer S3 URL for preview if available
+    const previewUrl = s3Info?.s3Url || url;
+    const newFile = {
+      url: previewUrl,
+      name,
+      fullPath,
+      s3Key: s3Info?.s3Key,
+      s3Url: s3Info?.s3Url,
+      uploadedToS3: !!s3Info
+    };
     setPdfFiles((prev) => [...prev, newFile]);
     if (pdfFiles.length === 0) {
       selectFileForPreview(newFile);
+    }
+    // Log S3 upload status
+    if (s3Info) {
+      console.log(`📤 File "${name}" uploaded to S3:`, s3Info);
+    } else {
+      console.warn(`⚠️ File "${name}" previewing from local blob (S3 upload failed)`);
     }
   };
 
@@ -303,6 +324,7 @@ function ChatPageContent() {
                     url={activePreviewFile.url}
                     zoom={zoom}
                     onWidthChange={handlePdfWidthChange}
+                    fileName={activePreviewFile.name}
                   />
                 </div>
               ) : (

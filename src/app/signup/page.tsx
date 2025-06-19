@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ConfirmSignup from './ConfirmSignup';
 
 function validateEmail(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -26,6 +27,8 @@ export default function SignUp() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [touched, setTouched] = useState<{[k:string]:boolean}>({});
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [signupEmail, setSignupEmail] = useState('');
   const router = useRouter();
 
   const passwordErrors = getPasswordValidationErrors(password);
@@ -56,17 +59,21 @@ export default function SignUp() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ firstName, lastName, email, password }),
-    });    if (res.ok) {
-      const data = await res.json();
-      // Store token and user data
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
+    });
+    if (res.ok) {
+      setSignupEmail(email);
+      setShowConfirm(true);
       setSuccess(true);
-      setTimeout(() => router.push('/'), 1200);
+      setError('');
+      return;
     } else {
       const data = await res.json();
       setError(data.error || 'Sign up failed');
     }
+  }
+
+  if (showConfirm && signupEmail) {
+    return <ConfirmSignup email={signupEmail} />;
   }
 
   return (
