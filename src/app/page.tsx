@@ -7,12 +7,9 @@ import ChatWindow from '@/components/ChatWindow'
 import ChatInput from '@/components/ChatInput'
 import MultiSelectDropdown from '@/components/MultiSelectDropdown'
 import { openPreviewTab } from '@/lib/utils'
-import PreviewSidebar from '@/components/PreviewSidebar'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 
 const PDFViewer = dynamic(() => import('@/components/PDFViewer'), { ssr: false });
-
-const PREVIEW_SIDEBAR_WIDTH = 240;
 
 function ChatPageContent() {
   const { user, loading } = useAuth();
@@ -35,7 +32,6 @@ function ChatPageContent() {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [showFileSelect, setShowFileSelect] = useState(false);
   const [naturalPdfWidth, setNaturalPdfWidth] = useState(0);
-  const [isPreviewSidebarOpen, setIsPreviewSidebarOpen] = useState(false);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -228,45 +224,33 @@ function ChatPageContent() {
           )}
           <div className="flex-grow"></div>
           <div className="flex gap-2 ml-auto" style={{ zIndex: 50 }}>
-            <div className="relative" ref={dropdownRef}>
-              <div className="flex items-center">
-                <button
-                  onClick={() => {
-                    setShowPreview(prev => !prev);
-                    setShowFileSelect(false); 
-                  }}
-                  disabled={pdfFiles.length === 0}
-                  className={`justify-center bg-white/80 border-0 rounded-lg shadow text-xs backdrop-blur-md transition-all duration-300 active:scale-95 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 animate-in disabled:opacity-50 font-semibold flex items-center ${showPreview ? 'w-10 h-10 p-2' : 'w-48 p-3'} ${pdfFiles.length > 1 && !showPreview ? 'rounded-r-none' : ''}`}
-                >
-                  {showPreview ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" className="transition-transform duration-200">
-                      <path fillRule="evenodd" d="M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z"/>
-                    </svg>
-                  ) : (
-                    pdfFiles.length > 1 ? `Show Preview (${pdfFiles.length})` : 'Show Preview'
-                  )}
-                </button>
-                {pdfFiles.length > 1 && !showPreview && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowFileSelect(prev => !prev);
-                    }}
-                    className="p-3 bg-white/80 border-0 rounded-r-lg shadow text-xs backdrop-blur-md transition-all duration-300 active:scale-95 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                  >
-                    <svg className={`w-4 h-4 transition-transform duration-200 ${showFileSelect ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-              {showFileSelect && (
-                <MultiSelectDropdown
-                  allFiles={pdfFiles}
-                  onConfirm={handleFileSelectConfirm}
-                />
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => {
+                if (pdfFiles.length > 1) {
+                  setShowFileSelect(prev => !prev);
+                } else {
+                  setShowPreview(true);
+                }
+              }}
+              disabled={pdfFiles.length === 0}
+              className="inline-flex items-center justify-center gap-2 bg-white/80 border-0 rounded-lg shadow text-xs backdrop-blur-md transition-all duration-300 active:scale-95 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 animate-in disabled:opacity-50 font-semibold h-9 px-4"
+            >
+              <span>Show Preview {pdfFiles.length > 1 ? `(${pdfFiles.length})` : ''}</span>
+              {pdfFiles.length > 1 && (
+                <svg className={`w-4 h-4 transition-transform duration-200 ${showFileSelect ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                </svg>
               )}
-            </div>
+            </button>
+
+            {showFileSelect && (
+              <MultiSelectDropdown
+                allFiles={pdfFiles}
+                onConfirm={handleFileSelectConfirm}
+              />
+            )}
+          </div>
           </div>
         </div>
         <ChatWindow messages={messages} />
@@ -277,9 +261,9 @@ function ChatPageContent() {
       <div 
         className={`h-screen hidden md:flex border-l bg-white/60 shadow-2xl backdrop-blur-lg ${showPreview ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
         style={{ 
-          width: showPreview ? previewWidth + (isPreviewSidebarOpen ? PREVIEW_SIDEBAR_WIDTH : 0) : 0, 
+          width: showPreview ? previewWidth : 0, 
           minWidth: showPreview ? 250 : 0, 
-          maxWidth: 900 + PREVIEW_SIDEBAR_WIDTH, 
+          maxWidth: 900, 
           position: 'relative', 
           zIndex: 30, 
           overflow: 'hidden', 
@@ -300,18 +284,16 @@ function ChatPageContent() {
                 <span className="text-slate-600 text-sm flex-shrink-0">Previewing:</span>
                 <strong className="text-slate-900 text-sm truncate">{activePreviewFile?.name || '...'}</strong>
               </div>
-              
-              {pdfFiles.length > 1 && !isPreviewSidebarOpen && (
-                <button 
-                  onClick={() => setIsPreviewSidebarOpen(true)} 
-                  className="p-1 rounded-full hover:bg-slate-200 transition-colors"
-                  aria-label="Open document list"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-              )}            </div>
+              <button
+                onClick={() => setShowPreview(false)}
+                className="p-1 rounded-full hover:bg-slate-200 transition-colors"
+                aria-label="Close preview"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 text-slate-600">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+          </div>
             
             <div className="flex items-center gap-2 px-2 py-2 border-b bg-gray-50/80">
               <label className="text-xs">Zoom:</label>
@@ -332,18 +314,6 @@ function ChatPageContent() {
                 </div>
               )}
             </div>
-          </div>
-          
-          <div
-            className="transition-all duration-300 ease-in-out"
-            style={{ width: isPreviewSidebarOpen ? PREVIEW_SIDEBAR_WIDTH : 0, overflow: 'hidden' }}
-          >
-            <PreviewSidebar
-              files={pdfFiles}
-              activeFileName={activePreviewFile?.name}
-              onFileSelect={selectFileForPreview}
-              onClose={() => setIsPreviewSidebarOpen(false)}
-            />
           </div>
         </div>
       </div>
