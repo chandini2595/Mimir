@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     backendFormData.append('file', file);
   }
   
-  const res = await fetch(`${process.env.BACKEND_URL || 'http://localhost:5000'}/api/upload/preview`, {
+  const res = await fetch(`${process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://your-backend-api.vercel.app'}/api/upload/preview`, {
     method: 'POST',
     headers: { 
       ...(authorization && { 'Authorization': authorization })

@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server'
 
-export async function GET(req: NextRequest, { params }: { params: { filename: string } }) {
-  const filename = decodeURIComponent(params.filename)
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ filename: string }> }) {
+  const resolvedParams = await params;
+  const filename = decodeURIComponent(resolvedParams.filename)
 
   // Serve from local if in dev mode
   if (process.env.NEXT_PUBLIC_LOCAL_DEV === 'true') {

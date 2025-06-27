@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   const token = req.headers.get('authorization')?.replace('Bearer ', '');
   
-  const res = await fetch(`${process.env.BACKEND_URL || 'http://localhost:5000'}/api/auth/local/verify`, {
+  const res = await fetch(`${process.env.BACKEND_URL || process.env.NEXT_PUBLIC_BACKEND_URL || 'https://your-backend-api.vercel.app'}/api/auth/local/verify`, {
     method: 'GET',
     headers: { 
       'Authorization': `Bearer ${token}`,

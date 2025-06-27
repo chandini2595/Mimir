@@ -40,9 +40,17 @@ You must configure the frontend to point to your backend API (see `.env` or `NEX
    yarn install
    ```
 2. **Set backend API URL:**
-   - Create a `.env.local` file:
+   - Copy the example environment file:
+     ```bash
+     cp .env.example .env.local
+     ```
+   - Edit `.env.local` and update the values:
      ```env
+     BACKEND_URL=http://localhost:5000
      NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
+     NEXT_PUBLIC_LOCAL_DEV=true
+     OPENROUTER_API_KEY=your_openrouter_api_key
+     GITHUB_TOKEN=your_github_token
      ```
 3. **Run the development server:**
    ```bash
@@ -61,13 +69,52 @@ You must configure the frontend to point to your backend API (see `.env` or `NEX
 
 ---
 
+## Vercel Deployment
+
+### Quick Deploy
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/your-username/mimir-chat-ui)
+
+### Manual Deployment
+
+1. **Deploy to Vercel:**
+   ```bash
+   npm install -g vercel
+   vercel
+   ```
+
+2. **Set Environment Variables in Vercel Dashboard:**
+   - Go to your project settings in Vercel
+   - Add these environment variables:
+     ```
+     BACKEND_URL=https://your-backend-api.vercel.app
+     NEXT_PUBLIC_BACKEND_URL=https://your-backend-api.vercel.app
+     NEXT_PUBLIC_LOCAL_DEV=false
+     OPENROUTER_API_KEY=your_openrouter_api_key
+     GITHUB_TOKEN=your_github_token
+     ```
+
+3. **Deploy your backend first** (if not already deployed)
+
+4. **Update the BACKEND_URL** with your actual backend URL
+
+### Environment Variables Reference
+- `BACKEND_URL`: Your backend API URL (server-side)
+- `NEXT_PUBLIC_BACKEND_URL`: Your backend API URL (client-side fallback)
+- `NEXT_PUBLIC_LOCAL_DEV`: Set to "false" for production
+- `OPENROUTER_API_KEY`: API key for LLM chat functionality
+- `GITHUB_TOKEN`: GitHub personal access token for file storage
+
+---
+
 ## Cloud Integration Checklist
 
-- [ ] AWS S3 bucket created and accessible
-- [ ] AWS Textract enabled
-- [ ] AWS Bedrock access (for LLM)
 - [ ] Backend API deployed and reachable
-- [ ] Environment variables set for API URL
+- [ ] Environment variables set in Vercel dashboard
+- [ ] OPENROUTER_API_KEY configured
+- [ ] GITHUB_TOKEN configured with repo permissions
+- [ ] AWS S3 bucket created and accessible (optional)
+- [ ] AWS Textract enabled (optional)
+- [ ] AWS Bedrock access (optional)
 
 ---
 
