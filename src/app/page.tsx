@@ -236,7 +236,7 @@ function ChatPageContent() {
               disabled={pdfFiles.length === 0}
               className="inline-flex items-center justify-center gap-2 bg-white/80 border-0 rounded-lg shadow text-xs backdrop-blur-md transition-all duration-300 active:scale-95 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 animate-in disabled:opacity-50 font-semibold h-9 px-4"
             >
-              <span>Show Preview {pdfFiles.length > 1 ? `(${pdfFiles.length})` : ''}</span>
+              <span>View Document {pdfFiles.length > 1 ? `(${pdfFiles.length})` : ''}</span>
               {pdfFiles.length > 1 && (
                 <svg className={`w-4 h-4 transition-transform duration-200 ${showFileSelect ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
