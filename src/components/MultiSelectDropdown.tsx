@@ -55,13 +55,22 @@ const MultiSelectDropdown = ({ allFiles, onConfirm }: Props) => {
         </div>
 
         <div className="mt-3 pt-3 border-t border-slate-200/80">
-           <button
-            onClick={() => onConfirm(selected)}
-            disabled={selected.length === 0}
-            className="w-full px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
-          >
-            Confirm Selection ({selected.length})
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => onConfirm(selected)}
+              disabled={selected.length === 0}
+              className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
+            >
+              Confirm Selection ({selected.length})
+            </button>
+            <button
+              onClick={() => setSelected([])}
+              disabled={selected.length === 0}
+              className="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 rounded-lg shadow-sm hover:bg-slate-200 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors"
+            >
+              Clear
+            </button>
+          </div>
         </div>
       </div>
     </div>
