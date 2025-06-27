@@ -27,8 +27,8 @@ const MultiSelectDropdown = ({ allFiles, onConfirm }: Props) => {
   };
 
   return (
-    <div 
-      className="absolute top-full right-0 mt-2 w-72 rounded-xl border border-blue-100/80 bg-white/80 shadow-2xl backdrop-blur-lg z-50 overflow-hidden"
+    <div
+      className="absolute top-full right-0 mt-2 w-80 rounded-xl border border-blue-100/80 bg-white/80 shadow-2xl backdrop-blur-lg z-50 overflow-hidden"
       style={{ fontFamily: 'Fira Mono, JetBrains Mono, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}
     >
       <div className="p-3">
@@ -59,14 +59,14 @@ const MultiSelectDropdown = ({ allFiles, onConfirm }: Props) => {
             <button
               onClick={() => onConfirm(selected)}
               disabled={selected.length === 0}
-              className="flex-1 px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 px-3 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
             >
               Confirm Selection ({selected.length})
             </button>
             <button
               onClick={() => setSelected([])}
               disabled={selected.length === 0}
-              className="px-4 py-2 text-sm font-semibold text-slate-600 bg-slate-100 rounded-lg shadow-sm hover:bg-slate-200 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-2 text-sm font-semibold text-slate-600 bg-slate-100 rounded-lg shadow-sm hover:bg-slate-200 disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
             >
               Clear
             </button>
