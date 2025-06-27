@@ -32,8 +32,6 @@ function ChatPageContent() {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [showFileSelect, setShowFileSelect] = useState(false);
   const [naturalPdfWidth, setNaturalPdfWidth] = useState(0);
-  const [multiPreviewFiles, setMultiPreviewFiles] = useState<Array<{ url: string, name: string }>>([]);
-  const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -83,35 +81,13 @@ function ChatPageContent() {
     window.addEventListener('wheel', handleWheel, { passive: false });
     return () => window.removeEventListener('wheel', handleWheel);  }, [showPreview]);
 
-  // Additional useEffect hooks MUST be before conditional returns
+  
   useEffect(() => {
     if (naturalPdfWidth > 0) {
       const newPdfWidth = (naturalPdfWidth * (zoom / 100)) + 40;
       setPreviewWidth(Math.max(250, Math.min(newPdfWidth, 900)));
     }
   }, [zoom, naturalPdfWidth]);
-
-  // Keyboard navigation for multi-document preview
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (showPreview && multiPreviewFiles.length > 1) {
-        if (e.key === 'ArrowLeft' && (e.ctrlKey || e.metaKey)) {
-          e.preventDefault();
-          const newIndex = currentPreviewIndex > 0 ? currentPreviewIndex - 1 : multiPreviewFiles.length - 1;
-          setCurrentPreviewIndex(newIndex);
-          setActivePreviewFile(multiPreviewFiles[newIndex]);
-        } else if (e.key === 'ArrowRight' && (e.ctrlKey || e.metaKey)) {
-          e.preventDefault();
-          const newIndex = currentPreviewIndex < multiPreviewFiles.length - 1 ? currentPreviewIndex + 1 : 0;
-          setCurrentPreviewIndex(newIndex);
-          setActivePreviewFile(multiPreviewFiles[newIndex]);
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [showPreview, multiPreviewFiles, currentPreviewIndex]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -127,7 +103,6 @@ function ChatPageContent() {
     };
   }, [showFileSelect]);
 
-  // Conditional returns MUST be after ALL hooks
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -137,14 +112,11 @@ function ChatPageContent() {
   }
 
   if (!user) {
-    return null; // AuthProvider will redirect to signin
+    return null; 
   }
 
-  // Handlers
   const selectFileForPreview = (file: { url: string; name: string }) => {
     setActivePreviewFile(file);
-    setMultiPreviewFiles([]);
-    setCurrentPreviewIndex(0);
     if (!showPreview) {
       setShowPreview(true);
     }
@@ -154,7 +126,6 @@ function ChatPageContent() {
     setMessages((prev) => [...prev, { user: userMessage, ai: '...' }]);
   };
   const handleUpload = (url: string, name: string, fullPath: string, s3Info?: { s3Key: string, s3Url: string }) => {
-    // Always prefer S3 URL for preview if available
     const previewUrl = s3Info?.s3Url || url;
     const newFile = {
       url: previewUrl,
@@ -165,10 +136,9 @@ function ChatPageContent() {
       uploadedToS3: !!s3Info
     };
     setPdfFiles((prev) => [...prev, newFile]);
-    if (pdfFiles.length === 0) {
-      selectFileForPreview(newFile);
-    }
-    // Log S3 upload status
+    
+    selectFileForPreview(newFile); 
+  
     if (s3Info) {
       console.log(`📤 File "${name}" uploaded to S3:`, s3Info);
     } else {
@@ -177,15 +147,11 @@ function ChatPageContent() {
   };
 
   const handleFileSelectConfirm = (selectedFiles: Array<{ url: string; name: string }>) => {
-    setShowFileSelect(false);
+    setShowFileSelect(false); 
     if (selectedFiles.length === 1) {
-      setMultiPreviewFiles([]);
       selectFileForPreview(selectedFiles[0]);
-    } else if (selectedFiles.length >= 2) {
-      setMultiPreviewFiles(selectedFiles);
-      setCurrentPreviewIndex(0);
-      setActivePreviewFile(selectedFiles[0]);
-      setShowPreview(true);
+    } else if (selectedFiles.length === 2 || selectedFiles.length === 3) {
+      openPreviewTab(selectedFiles);
     }
   };
   
@@ -238,53 +204,38 @@ function ChatPageContent() {
           </div>
         )}
         <div className="flex items-center gap-4 px-6 py-4 bg-white/80 shadow-sm relative z-30" style={{ borderBottom: 'none', boxShadow: 'none', background: 'rgba(255,255,255,0.85)' }}>
-          {!sidebarOpen && (
-            <button
-              className={`flex items-center justify-center w-10 h-10 rounded-full bg-white/80 border shadow hover:bg-blue-100 transition-all duration-300 group mr-2`}
-              style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)', border: 'none' }}
-              onClick={() => setSidebarOpen(true)}
-              aria-label="Open sidebar"
-            >
-              <span className="relative w-4 h-4 flex items-center justify-center">
-                <span className={`absolute w-4 h-0.5 bg-blue-500 rounded`} style={{ top: '2px' }}/>
-                <span className={`absolute w-4 h-0.5 bg-blue-500 rounded`} style={{ top: '7px' }}/>
-                <span className={`absolute w-4 h-0.5 bg-blue-500 rounded`} style={{ top: '12px' }}/>
-              </span>
-            </button>
-          )}
+        {!sidebarOpen && (
+          <button 
+            className="flex items-center justify-center size-10 rounded-full bg-white/80 shadow hover:bg-blue-100 transition-all mr-2"
+            style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)', border: 'none' }} 
+            onClick={() => setSidebarOpen(true)} 
+            aria-label="Open sidebar"
+          >
+            <div className="flex flex-col justify-between w-6 h-4">
+              <span className="block w-full h-[3px] bg-blue-500 rounded" />
+              <span className="block w-full h-[3px] bg-blue-500 rounded" />
+              <span className="block w-full h-[3px] bg-blue-500 rounded" />
+            </div>
+          </button>
+        )}
           <div className="flex-grow"></div>
-          <div className="flex gap-2 ml-auto" style={{ zIndex: 50 }}>
-          <div className="relative" ref={dropdownRef}>
-            {!showPreview && (
-              <button
-                onClick={() => {
-                  if (pdfFiles.length > 1) {
-                    setShowFileSelect(prev => !prev);
-                  } else {
+            {!showPreview && pdfFiles.length > 0 && (
+              <div className="flex gap-2 ml-auto" style={{ zIndex: 50 }}>
+                <button
+                  onClick={() => {
+                    if (!activePreviewFile && pdfFiles.length > 0) {
+                      setActivePreviewFile(pdfFiles[pdfFiles.length - 1]);
+                    }
                     setShowPreview(true);
-                  }
-                }}
-                disabled={pdfFiles.length === 0}
-                className="inline-flex items-center justify-center gap-2 bg-white/80 border-0 rounded-lg shadow text-xs backdrop-blur-md transition-all duration-300 active:scale-95 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 animate-in disabled:opacity-50 font-semibold h-9 px-4"
-              >
-                <span>View Document {pdfFiles.length > 1 ? `(${pdfFiles.length})` : ''}</span>
-                {pdfFiles.length > 1 && (
-                  <svg className={`w-4 h-4 transition-transform duration-200 ${showFileSelect ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-                  </svg>
-                )}
-              </button>
+                  }}
+                  className="inline-flex items-center justify-center gap-2 bg-white/80 border-0 rounded-lg shadow text-xs backdrop-blur-md transition-all duration-300 active:scale-95 hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-300 animate-in font-semibold h-9 px-4"
+                >
+                  <span>View Document</span>
+                </button>
+              </div>
             )}
-
-            {showFileSelect && !showPreview && (
-              <MultiSelectDropdown
-                allFiles={pdfFiles}
-                onConfirm={handleFileSelectConfirm}
-              />
-            )}
-          </div>
-          </div>
         </div>
+       
         <ChatWindow messages={messages} />
         <ChatInput onResponse={handleResponse} onUpload={handleUpload} />
       </div>
@@ -311,54 +262,37 @@ function ChatPageContent() {
             className="flex-1 flex flex-col h-screen overflow-hidden"
             style={{ width: previewWidth }}
           >
+  
             <div className="p-2 font-semibold border-b flex items-center justify-between relative">
               <div className="flex items-center gap-2 min-w-0">
                 <span className="text-slate-600 text-sm flex-shrink-0">Previewing:</span>
                 <strong className="text-slate-900 text-sm truncate">{activePreviewFile?.name || '...'}</strong>
-                {multiPreviewFiles.length > 1 && (
-                  <span className="text-slate-500 text-xs">
-                    ({currentPreviewIndex + 1} of {multiPreviewFiles.length})
-                  </span>
-                )}
               </div>
-              <div className="flex items-center gap-1">
-                {multiPreviewFiles.length > 1 && (
-                  <>
+
+              <div className="flex items-center gap-2">
+                {pdfFiles.length > 1 && (
+                  <div className="relative" ref={dropdownRef}>
                     <button
-                      onClick={() => {
-                        const newIndex = currentPreviewIndex > 0 ? currentPreviewIndex - 1 : multiPreviewFiles.length - 1;
-                        setCurrentPreviewIndex(newIndex);
-                        setActivePreviewFile(multiPreviewFiles[newIndex]);
-                      }}
-                      className="p-1 rounded-full hover:bg-slate-200 transition-colors"
-                      aria-label="Previous document"
+                      onClick={() => setShowFileSelect(prev => !prev)}
+                      className="inline-flex items-center justify-center gap-1.5 bg-slate-100 border-0 rounded-md shadow-sm text-xs transition-all duration-300 active:scale-95 hover:bg-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-300 font-semibold h-8 px-3"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-slate-600">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                      <span>Switch</span>
+                      <svg className={`w-4 h-4 transition-transform duration-200 ${showFileSelect ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                       </svg>
                     </button>
-                    <button
-                      onClick={() => {
-                        const newIndex = currentPreviewIndex < multiPreviewFiles.length - 1 ? currentPreviewIndex + 1 : 0;
-                        setCurrentPreviewIndex(newIndex);
-                        setActivePreviewFile(multiPreviewFiles[newIndex]);
-                      }}
-                      className="p-1 rounded-full hover:bg-slate-200 transition-colors"
-                      aria-label="Next document"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-slate-600">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                      </svg>
-                    </button>
-                  </>
+                    {showFileSelect && (
+                      <MultiSelectDropdown
+                        allFiles={pdfFiles}
+                        onConfirm={handleFileSelectConfirm}
+                      />
+                    )}
+                  </div>
                 )}
+
                 <button
-                  onClick={() => {
-                    setShowPreview(false);
-                    setMultiPreviewFiles([]);
-                    setCurrentPreviewIndex(0);
-                  }}
-                  className="p-1 rounded-full hover:bg-slate-200 transition-colors"
+                  onClick={() => setShowPreview(false)}
+                  className="p-1 rounded-full hover:bg-slate-200/80 transition-colors"
                   aria-label="Close preview"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 text-slate-600">
@@ -366,7 +300,7 @@ function ChatPageContent() {
                   </svg>
                 </button>
               </div>
-          </div>
+            </div>
             
             <div className="flex items-center gap-2 px-2 py-2 border-b bg-gray-50/80">
               <label className="text-xs">Zoom:</label>
