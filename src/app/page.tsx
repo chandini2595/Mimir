@@ -209,16 +209,16 @@ function ChatPageContent() {
         )}
         <div className="flex items-center gap-4 px-6 py-4 bg-white/80 shadow-sm relative z-30" style={{ borderBottom: 'none', boxShadow: 'none', background: 'rgba(255,255,255,0.85)' }}>
           {!sidebarOpen && (
-            <button 
-              className={`flex items-center justify-center w-10 h-10 rounded-full bg-white/80 border shadow hover:bg-blue-100 transition-all duration-300 group mr-2`} 
-              style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)', border: 'none' }} 
-              onClick={() => setSidebarOpen(true)} 
+            <button
+              className={`flex items-center justify-center w-10 h-10 rounded-full bg-white/80 border shadow hover:bg-blue-100 transition-all duration-300 group mr-2`}
+              style={{ boxShadow: '0 4px 24px 0 rgba(0,0,0,0.10)', border: 'none' }}
+              onClick={() => setSidebarOpen(true)}
               aria-label="Open sidebar"
             >
-              <span className="relative w-6 h-6 flex items-center justify-center">
-                <span className={`absolute left-0 top-1 w-6 h-0.5 bg-blue-500 rounded`}/>
-                <span className={`absolute left-0 top-3 w-6 h-0.5 bg-blue-500 rounded`}/>
-                <span className={`absolute left-0 top-5 w-6 h-0.5 bg-blue-500 rounded`}/>
+              <span className="relative w-4 h-4 flex items-center justify-center">
+                <span className={`absolute w-4 h-0.5 bg-blue-500 rounded`} style={{ top: '2px' }}/>
+                <span className={`absolute w-4 h-0.5 bg-blue-500 rounded`} style={{ top: '7px' }}/>
+                <span className={`absolute w-4 h-0.5 bg-blue-500 rounded`} style={{ top: '12px' }}/>
               </span>
             </button>
           )}
