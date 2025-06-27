@@ -32,6 +32,8 @@ function ChatPageContent() {
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [showFileSelect, setShowFileSelect] = useState(false);
   const [naturalPdfWidth, setNaturalPdfWidth] = useState(0);
+  const [multiPreviewFiles, setMultiPreviewFiles] = useState<Array<{ url: string, name: string }>>([]);
+  const [currentPreviewIndex, setCurrentPreviewIndex] = useState(0);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -89,6 +91,28 @@ function ChatPageContent() {
     }
   }, [zoom, naturalPdfWidth]);
 
+  // Keyboard navigation for multi-document preview
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (showPreview && multiPreviewFiles.length > 1) {
+        if (e.key === 'ArrowLeft' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          const newIndex = currentPreviewIndex > 0 ? currentPreviewIndex - 1 : multiPreviewFiles.length - 1;
+          setCurrentPreviewIndex(newIndex);
+          setActivePreviewFile(multiPreviewFiles[newIndex]);
+        } else if (e.key === 'ArrowRight' && (e.ctrlKey || e.metaKey)) {
+          e.preventDefault();
+          const newIndex = currentPreviewIndex < multiPreviewFiles.length - 1 ? currentPreviewIndex + 1 : 0;
+          setCurrentPreviewIndex(newIndex);
+          setActivePreviewFile(multiPreviewFiles[newIndex]);
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showPreview, multiPreviewFiles, currentPreviewIndex]);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -119,6 +143,8 @@ function ChatPageContent() {
   // Handlers
   const selectFileForPreview = (file: { url: string; name: string }) => {
     setActivePreviewFile(file);
+    setMultiPreviewFiles([]);
+    setCurrentPreviewIndex(0);
     if (!showPreview) {
       setShowPreview(true);
     }
@@ -151,11 +177,15 @@ function ChatPageContent() {
   };
 
   const handleFileSelectConfirm = (selectedFiles: Array<{ url: string; name: string }>) => {
-    setShowFileSelect(false); 
+    setShowFileSelect(false);
     if (selectedFiles.length === 1) {
+      setMultiPreviewFiles([]);
       selectFileForPreview(selectedFiles[0]);
-    } else if (selectedFiles.length === 2 || selectedFiles.length === 3) {
-      openPreviewTab(selectedFiles);
+    } else if (selectedFiles.length >= 2) {
+      setMultiPreviewFiles(selectedFiles);
+      setCurrentPreviewIndex(0);
+      setActivePreviewFile(selectedFiles[0]);
+      setShowPreview(true);
     }
   };
   
@@ -285,16 +315,57 @@ function ChatPageContent() {
               <div className="flex items-center gap-2 min-w-0">
                 <span className="text-slate-600 text-sm flex-shrink-0">Previewing:</span>
                 <strong className="text-slate-900 text-sm truncate">{activePreviewFile?.name || '...'}</strong>
+                {multiPreviewFiles.length > 1 && (
+                  <span className="text-slate-500 text-xs">
+                    ({currentPreviewIndex + 1} of {multiPreviewFiles.length})
+                  </span>
+                )}
               </div>
-              <button
-                onClick={() => setShowPreview(false)}
-                className="p-1 rounded-full hover:bg-slate-200 transition-colors"
-                aria-label="Close preview"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 text-slate-600">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-1">
+                {multiPreviewFiles.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => {
+                        const newIndex = currentPreviewIndex > 0 ? currentPreviewIndex - 1 : multiPreviewFiles.length - 1;
+                        setCurrentPreviewIndex(newIndex);
+                        setActivePreviewFile(multiPreviewFiles[newIndex]);
+                      }}
+                      className="p-1 rounded-full hover:bg-slate-200 transition-colors"
+                      aria-label="Previous document"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-slate-600">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => {
+                        const newIndex = currentPreviewIndex < multiPreviewFiles.length - 1 ? currentPreviewIndex + 1 : 0;
+                        setCurrentPreviewIndex(newIndex);
+                        setActivePreviewFile(multiPreviewFiles[newIndex]);
+                      }}
+                      className="p-1 rounded-full hover:bg-slate-200 transition-colors"
+                      aria-label="Next document"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-slate-600">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                      </svg>
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => {
+                    setShowPreview(false);
+                    setMultiPreviewFiles([]);
+                    setCurrentPreviewIndex(0);
+                  }}
+                  className="p-1 rounded-full hover:bg-slate-200 transition-colors"
+                  aria-label="Close preview"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 text-slate-600">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
           </div>
             
             <div className="flex items-center gap-2 px-2 py-2 border-b bg-gray-50/80">
